@@ -1,0 +1,223 @@
+/* Ensure [hidden] attribute always wins over display rules */
+[hidden] { display: none !important; }
+
+/* ======================================================
+   Drop Zone
+   ====================================================== */
+#drop-zone {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  transition: background 0.1s;
+  cursor: default;
+}
+
+#drop-zone.drag-over {
+  background: #e6e6e6;
+  outline: 2px dashed #aaa;
+  outline-offset: -16px;
+}
+
+.app-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.turbo-label {
+  margin-top: 0.3rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #555;
+}
+
+#drop-error {
+  margin-top: 0.5rem;
+  max-width: 380px;
+}
+
+/* ======================================================
+   Drag overlay (over working view)
+   ====================================================== */
+#drag-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  pointer-events: none;
+  color: #fff;
+  letter-spacing: 0.08em;
+}
+
+/* ======================================================
+   Working View — header
+   ====================================================== */
+#working-view > header {
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.status-area {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 12px;
+  color: #555;
+}
+
+#timer { color: #888; }
+
+/* ======================================================
+   Action bar & Settings dropdown
+   ====================================================== */
+.action-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.4rem;
+  position: relative;
+}
+
+#settings-panel {
+  margin-left: auto;
+  position: relative;
+}
+
+#settings-panel > summary {
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+  padding: 1px 6px;
+  border: 1px solid #999;
+  background: hsla(0,0%,0%,12%);
+}
+#settings-panel > summary::-webkit-details-marker { display: none; }
+#settings-panel > summary::marker               { display: none; }
+
+.settings-body {
+  position: absolute;
+  top: calc(100% + 2px);
+  right: 0;
+  background: #f0f0f0;
+  border: 1px solid #bbb;
+  padding: 0.5rem 0.6rem;
+  z-index: 20;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.setting-row > :first-child    { width: 96px; flex-shrink: 0; }
+.setting-row input[type="range"] { flex: 1; }
+.setting-row > :last-child     { width: 40px; text-align: right; flex-shrink: 0; }
+
+/* ======================================================
+   Flash area (thumbnail preview during render)
+   ====================================================== */
+#flash-area {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  height: 140px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+#flash-img {
+  max-height: 140px;
+  width: auto;
+  border: 1px solid #ccc;
+}
+
+/* ======================================================
+   Notice area
+   ====================================================== */
+#notice-area {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin-bottom: 0.4rem;
+}
+
+.notice       { color: #666; }
+.notice-warn  { color: #7a5200; }
+
+#flatten-anyway-btn { margin-bottom: 0.4rem; }
+
+/* ======================================================
+   Mega tooltip
+   ====================================================== */
+#mega-tooltip {
+  position: fixed;
+  pointer-events: none;   /* mouse can never "land" on it */
+  opacity: 0.80;
+  z-index: 200;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+}
+
+#mega-tooltip img {
+  display: block;
+  /* width/height set dynamically in JS */
+}
+
+/* ======================================================
+   Thumbnail grid
+   ====================================================== */
+#thumb-grid {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.page-card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 2px;
+  padding: 0;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.13);
+  transition: border-color 0.1s, box-shadow 0.1s;
+}
+
+.page-card:hover {
+  border-color: #bbb;
+  box-shadow: 0 2px 7px rgba(0,0,0,0.2);
+}
+
+.page-card.polarity       { border: 6px solid #FFA6D3; }
+.page-card.polarity:hover { border-color: #d07090; }
+
+.page-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.page-num {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  background: rgba(0,0,0,0.45);
+  color: #fff;
+  padding: 1px 4px;
+  border-radius: 2px;
+  line-height: 1.5;
+}

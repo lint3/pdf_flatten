@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PDF Flattener</title>
+  <link rel="stylesheet" href="css/style_common.css">
+  <link rel="stylesheet" href="css/style_app.css">
+</head>
+<body>
+
+  <!-- ── Drop Zone ─────────────────────────────────── -->
+  <div id="drop-zone">
+    <p class="app-title">PDF Flattener</p>
+    <p class="label-caps" style="margin-bottom:0.6rem">Selectively flatten PDF pages to raster images</p>
+    <button id="browse-btn" class="btn-primary">Browse</button>
+    <input type="file" id="file-input" accept=".pdf" hidden>
+    <label class="checkbox-label turbo-label">
+      <input type="checkbox" id="turbo-mode"> TURBO MODE
+    </label>
+    <div id="drop-error" class="error-detail" hidden></div>
+  </div>
+
+  <!-- Drag overlay (shown over working view during drag) -->
+  <div id="drag-overlay" hidden>
+    <span class="label-caps">Drop to load new PDF</span>
+  </div>
+
+  <!-- ── Working View ───────────────────────────────── -->
+  <div id="working-view" hidden>
+
+    <header>
+      <div class="status-area">
+        <span id="status-text"></span>
+        <span id="timer" class="label-caps"></span>
+      </div>
+    </header>
+
+    <div class="action-bar">
+      <button id="done-btn" class="btn-primary" disabled>SAVE FLATTENED</button>
+      <button id="clear-btn" class="btn-fade btn-danger">CLEAR ALL</button>
+
+      <details id="settings-panel">
+        <summary class="label-caps">▾ Settings</summary>
+        <div class="settings-body">
+          <div class="setting-row">
+            <span class="label-caps">Output scale</span>
+            <input type="range" id="s-scale" min="0.5" max="4" step="0.5" value="1.5">
+            <span id="s-scale-val" class="label-caps">1.5×</span>
+          </div>
+          <div class="setting-row">
+            <span class="label-caps">JPEG quality</span>
+            <input type="range" id="s-quality" min="10" max="100" step="5" value="90">
+            <span id="s-quality-val" class="label-caps">90</span>
+          </div>
+          <div class="setting-row">
+            <span class="label-caps">Thumb size</span>
+            <input type="range" id="s-thumb" min="30" max="300" step="10" value="100">
+            <span id="s-thumb-val" class="label-caps">100px</span>
+          </div>
+          <label class="checkbox-label" style="margin-top:0.1rem">
+            <input type="checkbox" id="s-print-rendering"> Print rendering
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="s-render-annotations" checked> Render annotations
+          </label>
+          <div style="margin-top:0.2rem">
+            <button id="render-btn">Re-render</button>
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <div id="flash-area" hidden>
+      <img id="flash-img" alt="">
+    </div>
+
+    <div id="notice-area"></div>
+    <button id="flatten-anyway-btn" hidden>Flatten anyway</button>
+    <div id="thumb-grid"></div>
+
+  </div>
+
+  <!-- Mega tooltip — lives outside working-view so it can overlay anything -->
+  <div id="mega-tooltip" hidden><img id="tooltip-img" alt=""></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
