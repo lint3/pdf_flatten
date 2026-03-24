@@ -44,8 +44,8 @@
         <div class="settings-body">
           <div class="setting-row">
             <span class="label-caps">Output scale</span>
-            <input type="range" id="s-scale" min="0.5" max="4" step="0.5" value="1.5">
-            <span id="s-scale-val" class="label-caps">1.5×</span>
+            <input type="range" id="s-scale" min="0.5" max="6" step="0.5" value="3.5">
+            <span id="s-scale-val" class="label-caps">3.5×</span>
           </div>
           <div class="setting-row">
             <span class="label-caps">JPEG quality</span>
@@ -58,9 +58,6 @@
             <span id="s-thumb-val" class="label-caps">100px</span>
           </div>
           <label class="checkbox-label" style="margin-top:0.1rem">
-            <input type="checkbox" id="s-print-rendering"> Print rendering
-          </label>
-          <label class="checkbox-label">
             <input type="checkbox" id="s-render-annotations" checked> Render annotations
           </label>
           <div style="margin-top:0.2rem">
@@ -69,6 +66,7 @@
         </div>
       </details>
     </div>
+    <div id="result-text" class="label-caps"></div>
 
     <div id="flash-area" hidden>
       <img id="flash-img" alt="">

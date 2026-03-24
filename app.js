@@ -32,7 +32,7 @@ const state = {
   polarityPages: new Set(),  // 0-based indices to keep as original (auto-seeded, user-editable)
   isRendering: false,
   renderToken: 0,        // increment to abort in-progress render
-  settings: { outputScale: 1.5, jpegQuality: 90, thumbSize: 100, printRendering: false, renderAnnotations: true },
+  settings: { outputScale: 3.5, jpegQuality: 90, thumbSize: 100, renderAnnotations: true },
 };
 
 // Shared offscreen canvases — reused across pages to reduce GC pressure
@@ -64,23 +64,36 @@ const sQuality    = document.getElementById('s-quality');
 const sQualityVal = document.getElementById('s-quality-val');
 const sThumb             = document.getElementById('s-thumb');
 const sThumbVal          = document.getElementById('s-thumb-val');
-const sPrintRendering    = document.getElementById('s-print-rendering');
 const sRenderAnnotations = document.getElementById('s-render-annotations');
 
 // ── Timer ────────────────────────────────────────────────────────────────────
 let timerInterval;
+let timerStart;
 
 function startTimer() {
-  const start = Date.now();
+  timerStart = Date.now();
   timerEl.textContent = '0s';
   clearInterval(timerInterval);
   timerInterval = setInterval(() => {
-    timerEl.textContent = Math.floor((Date.now() - start) / 1000) + 's';
+    timerEl.textContent = Math.floor((Date.now() - timerStart) / 1000) + 's';
   }, 250);
 }
 
 function stopTimer() {
   clearInterval(timerInterval);
+}
+
+// ── File size formatting ──────────────────────────────────────────────────────
+function formatSize(bytes) {
+  const units = ['B', 'kB', 'MB', 'GB'];
+  let val = bytes, u = 0;
+  while (val >= 1000 && u < units.length - 1) { val /= 1000; u++; }
+  // Round to 2 significant digits
+  let rounded;
+  if      (val >= 100) rounded = Math.round(val / 10) * 10;
+  else if (val >= 10)  rounded = Math.round(val);
+  else                 rounded = Math.round(val * 10) / 10;
+  return rounded + ' ' + units[u];
 }
 
 // ── Drag / drop — always active on document ───────────────────────────────
@@ -133,7 +146,6 @@ renderBtn.addEventListener('click', () => {
   state.settings.outputScale      = parseFloat(sScale.value);
   state.settings.jpegQuality      = parseInt(sQuality.value);
   state.settings.thumbSize        = parseInt(sThumb.value);
-  state.settings.printRendering   = sPrintRendering.checked;
   state.settings.renderAnnotations = sRenderAnnotations.checked;
   document.getElementById('settings-panel').open = false;
   startRender();
@@ -142,6 +154,7 @@ renderBtn.addEventListener('click', () => {
 doneBtn.addEventListener('click', buildOutput);
 clearBtn.addEventListener('click', clearAll);
 
+const resultText       = document.getElementById('result-text');
 const flattenAnywayBtn = document.getElementById('flatten-anyway-btn');
 const settingsPanel = document.getElementById('settings-panel');
 document.addEventListener('click', e => {
@@ -185,6 +198,7 @@ function clearAll() {
   hideTooltip();
   thumbGrid.innerHTML  = '';
   noticeArea.innerHTML = '';
+  resultText.textContent  = '';
   flattenAnywayBtn.hidden = true;
   flashArea.hidden  = true;
   doneBtn.disabled  = true;
@@ -207,6 +221,7 @@ async function startRender() {
 
   thumbGrid.innerHTML  = '';
   noticeArea.innerHTML = '';
+  resultText.textContent = '';
   doneBtn.disabled = true;
   timerEl.textContent  = '';
   statusText.textContent = 'Checking...';
@@ -259,15 +274,12 @@ async function startRender() {
 
     stopTimer();
     state.isRendering = false;
-    statusText.textContent = 'Done.';
-
-    if (state.polarityPages.size === 0) {
-      showNotice('No polarity pages auto-detected.', 'info');
-    } else {
-      const nums = [...state.polarityPages].map(i => i + 1).sort((a, b) => a - b).join(', ');
-      const s = state.polarityPages.size !== 1 ? 's' : '';
-      showNotice(`Auto-detected polarity page${s}: ${nums}`, 'info');
-    }
+    const elapsed    = Math.round((Date.now() - timerStart) / 1000);
+    const inputSize  = formatSize(state.file.size);
+    const outputSize = formatSize(state.flatImages.reduce((s, img) => s + img.byteLength, 0));
+    statusText.textContent = '';
+    timerEl.textContent = '';
+    resultText.textContent = `Done in ${elapsed}s, ${inputSize} → ${outputSize}`;
 
     renderThumbGrid();
     doneBtn.disabled = false;
@@ -300,12 +312,7 @@ async function renderPage(i) {
   const annotationMode = (pdfjsLib.AnnotationMode || { DISABLE: 0, ENABLE: 1 })[
     state.settings.renderAnnotations ? 'ENABLE' : 'DISABLE'
   ];
-  await page.render({
-    canvasContext: offCtx,
-    viewport,
-    intent:         state.settings.printRendering ? 'print' : 'display',
-    annotationMode,
-  }).promise;
+  await page.render({ canvasContext: offCtx, viewport, annotationMode }).promise;
 
   // JPEG bytes for output assembly
   const quality = state.settings.jpegQuality / 100;
