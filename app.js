@@ -133,13 +133,58 @@ fileInput.addEventListener('change', e => {
   fileInput.value = '';
 });
 
+// ── Settings persistence ──────────────────────────────────────────────────
+const SETTINGS_KEY = 'pdf-flattener-settings';
+
+function saveSettings() {
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify({
+    outputScale:      parseFloat(sScale.value),
+    jpegQuality:      parseInt(sQuality.value),
+    thumbSize:        parseInt(sThumb.value),
+    renderAnnotations: sRenderAnnotations.checked,
+    turboMode:        turboCheck.checked,
+  }));
+}
+
+function loadSettings() {
+  let s;
+  try { s = JSON.parse(localStorage.getItem(SETTINGS_KEY)); } catch (e) { return; }
+  if (!s) return;
+
+  if (s.outputScale != null) {
+    sScale.value = s.outputScale;
+    sScaleVal.textContent = s.outputScale + '×';
+    state.settings.outputScale = s.outputScale;
+  }
+  if (s.jpegQuality != null) {
+    sQuality.value = s.jpegQuality;
+    sQualityVal.textContent = s.jpegQuality;
+    state.settings.jpegQuality = s.jpegQuality;
+  }
+  if (s.thumbSize != null) {
+    sThumb.value = s.thumbSize;
+    sThumbVal.textContent = s.thumbSize + 'px';
+    state.settings.thumbSize = s.thumbSize;
+  }
+  if (s.renderAnnotations != null) {
+    sRenderAnnotations.checked = s.renderAnnotations;
+    state.settings.renderAnnotations = s.renderAnnotations;
+  }
+  if (s.turboMode != null) turboCheck.checked = s.turboMode;
+}
+
+loadSettings();
+
 // ── Settings live labels ──────────────────────────────────────────────────
-sScale.addEventListener('input', () => { sScaleVal.textContent = sScale.value + '×'; });
-sQuality.addEventListener('input', () => { sQualityVal.textContent = sQuality.value; });
+sScale.addEventListener('input', () => { sScaleVal.textContent = sScale.value + '×'; saveSettings(); });
+sQuality.addEventListener('input', () => { sQualityVal.textContent = sQuality.value; saveSettings(); });
 sThumb.addEventListener('input', () => {
   sThumbVal.textContent = sThumb.value + 'px';
   if (state.thumbUrls.length) updateThumbGridColumns();
+  saveSettings();
 });
+sRenderAnnotations.addEventListener('change', saveSettings);
+turboCheck.addEventListener('change', saveSettings);
 
 renderBtn.addEventListener('click', () => {
   if (!state.file) return;
@@ -153,6 +198,20 @@ renderBtn.addEventListener('click', () => {
 
 doneBtn.addEventListener('click', buildOutput);
 clearBtn.addEventListener('click', clearAll);
+
+const DEFAULTS = { outputScale: 3.5, jpegQuality: 90, thumbSize: 100, renderAnnotations: true, turboMode: false };
+
+document.getElementById('reset-defaults-btn').addEventListener('click', () => {
+  sScale.value = DEFAULTS.outputScale;
+  sScaleVal.textContent = DEFAULTS.outputScale + '×';
+  sQuality.value = DEFAULTS.jpegQuality;
+  sQualityVal.textContent = DEFAULTS.jpegQuality;
+  sThumb.value = DEFAULTS.thumbSize;
+  sThumbVal.textContent = DEFAULTS.thumbSize + 'px';
+  sRenderAnnotations.checked = DEFAULTS.renderAnnotations;
+  turboCheck.checked = DEFAULTS.turboMode;
+  saveSettings();
+});
 
 const resultText       = document.getElementById('result-text');
 const flattenAnywayBtn = document.getElementById('flatten-anyway-btn');
@@ -384,7 +443,7 @@ async function detectPolarityPages() {
 
 // ── Already-flattened detection ───────────────────────────────────────────
 async function checkAlreadyFlattened() {
-  const sample = Math.min(state.numPages, 10);
+  const sample = Math.min(state.numPages, 4);
   let flatCount = 0;
 
   for (let i = 0; i < sample; i++) {

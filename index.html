@@ -11,10 +11,9 @@
   <!-- ── Drop Zone ─────────────────────────────────── -->
   <div id="drop-zone">
     <p class="app-title">PDF Flattener</p>
-    <p class="label-caps" style="margin-bottom:0.6rem">Selectively flatten PDF pages to raster images</p>
-    <button id="browse-btn" class="btn-primary">Browse</button>
+    <button id="browse-btn" class="btn-primary" title="You can also drag and drop anywhere on this page.">Browse</button>
     <input type="file" id="file-input" accept=".pdf" hidden>
-    <label class="checkbox-label turbo-label">
+    <label class="checkbox-label turbo-label" title="Auto-download when complete">
       <input type="checkbox" id="turbo-mode"> TURBO MODE
     </label>
     <div id="drop-error" class="error-detail" hidden></div>
@@ -60,8 +59,9 @@
           <label class="checkbox-label" style="margin-top:0.1rem">
             <input type="checkbox" id="s-render-annotations" checked> Render annotations
           </label>
-          <div style="margin-top:0.2rem">
-            <button id="render-btn">Re-render</button>
+          <div style="margin-top:0.2rem; display:flex; gap:0.4rem">
+            <button id="render-btn" class="btn-primary">Re-render</button>
+            <button id="reset-defaults-btn" class="btn-fade btn-danger">Reset to defaults</button>
           </div>
         </div>
       </details>
