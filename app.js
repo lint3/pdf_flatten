@@ -350,7 +350,8 @@ async function startRender() {
     stopTimer();
     state.isRendering = false;
     statusText.textContent = 'Error.';
-    showNotice('Error loading PDF: ' + err.message, 'error');
+    console.error('[PDF Flattener] Error:', err);
+    showNotice('Error: ' + err.message, 'error');
   }
 }
 
@@ -364,14 +365,23 @@ async function renderPage(i) {
   state.pageDims[i] = { width: nativeVp.width, height: nativeVp.height };
 
   // Render to shared offscreen canvas
-  offCanvas.width  = Math.round(viewport.width);
-  offCanvas.height = Math.round(viewport.height);
+  const targetW = Math.round(viewport.width);
+  const targetH = Math.round(viewport.height);
+  console.log(`[PDF Flattener] Page ${i + 1}: ${nativeVp.width}×${nativeVp.height} pt → ${targetW}×${targetH} px @ ${scale}×`);
+
+  offCanvas.width  = targetW;
+  offCanvas.height = targetH;
   offCtx.imageSmoothingEnabled = true;
   offCtx.imageSmoothingQuality = 'high';
   const annotationMode = (pdfjsLib.AnnotationMode || { DISABLE: 0, ENABLE: 1 })[
     state.settings.renderAnnotations ? 'ENABLE' : 'DISABLE'
   ];
-  await page.render({ canvasContext: offCtx, viewport, annotationMode }).promise;
+  try {
+    await page.render({ canvasContext: offCtx, viewport, annotationMode }).promise;
+  } catch (err) {
+    err.message = `Page ${i + 1} (${targetW}×${targetH}px @ ${scale}×): ${err.message}`;
+    throw err;
+  }
 
   // JPEG bytes for output assembly
   const quality = state.settings.jpegQuality / 100;
